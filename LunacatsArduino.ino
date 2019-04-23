@@ -1,54 +1,82 @@
 #include <ArduinoJson.h>
 #include <Servo.h>
 
-Servo FLWheel; //These could be wrong
+//Used for the Actuator
+#define NEUTRAL 92;
+#define ACT_UP_MATCH 140;
+#define ACT_UP 10;
+#define ACT_DOWN 170;
+#define ACT_UP_MATCH 45;
+
+Servo FLWheel; //This is definitely correct. Good job Tom
 Servo BLWheel;
 Servo FRWheel;
 Servo BRWheel;
+Servo ActLeft;
+Servo ActRight;
+
 
 void forward()
 {
   int i = 110;
-  FLWheel.write(i % 180);
-  BLWheel.write(i % 180);
-  FRWheel.write(i % 180);
-  BRWheel.write(i % 180);
+  FLWheel.write(i);
+  BLWheel.write(i);
+  FRWheel.write(i);
+  BRWheel.write(i);
 }
 
 void left()
 {
   int i = 90;
-  FLWheel.write(i % 180 - 25);
-  BLWheel.write(i % 180 - 25);
-  FRWheel.write(25 + i % 180);
-  BRWheel.write(25 + i % 180);
+  FLWheel.write(i - 25);
+  BLWheel.write(i - 25);
+  FRWheel.write(25 + i);
+  BRWheel.write(25 + i);
 }
 
 void right()
 {
   int i = 90;
-  FLWheel.write(25 + i % 180);
-  BLWheel.write(25 + i % 180);
-  FRWheel.write(i % 180 - 25);
-  BRWheel.write(i % 180 - 25);
+  FLWheel.write(25 + i);
+  BLWheel.write(25 + i);
+  FRWheel.write(i - 25);
+  BRWheel.write(i - 25);
 }
 
 void back()
 {
   int i = 70;
-  FLWheel.write(i % 180);
-  BLWheel.write(i % 180);
-  FRWheel.write(i % 180);
-  BRWheel.write(i % 180);
+  FLWheel.write(i);
+  BLWheel.write(i);
+  FRWheel.write(i);
+  BRWheel.write(i);
 }
 
 void halt()
 {
   int i = 90;
-  FLWheel.write(i % 180);
-  BLWheel.write(i % 180);
-  FRWheel.write(i % 180);
-  BRWheel.write(i % 180);
+  FLWheel.write(i);
+  BLWheel.write(i);
+  FRWheel.write(i);
+  BRWheel.write(i);
+}
+
+
+void upAct()
+{
+  ActLeft.write(ACT_UP);
+  ActRight.write(ACT_UP_MATCH);
+}
+
+void stopAct {
+  ActLeft.write(NEUTRAL);
+  ActRight.write(NEUTRAL);
+}
+
+void downAct()
+{
+  ActLeft.write(ACT_DOWN);
+  ActRight.write(ACT_DOWN_MATCH);
 }
 
 void setup()
@@ -58,6 +86,8 @@ void setup()
   BLWheel.attach(A2);
   FRWheel.attach(A1);
   BRWheel.attach(A3);
+  ActLeft.attach(A5);
+  ActRight.attach(A6);
 
   Serial.begin(115200);
 
@@ -92,9 +122,16 @@ void parseCommand(String buff)
     else if (root["c"] == 3)
     {
       right();
+    } else if (root["c"] ==10)
+    {
+      upAct();
+    } else if (root["c"] ==11)
+    {
+      downAct();
     }
     else
     {
+      stopAct());
       halt();
     }
 
