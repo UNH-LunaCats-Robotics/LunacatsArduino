@@ -2,11 +2,11 @@
 #include <Servo.h>
 
 //Used for the Actuator
-#define NEUTRAL 92;
-#define ACT_UP_MATCH 140;
-#define ACT_UP 10;
-#define ACT_DOWN 170;
-#define ACT_UP_MATCH 45;
+#define NEUTRAL 92
+#define ACT_DOWN_MATCH 140
+#define ACT_UP 10
+#define ACT_DOWN 170
+#define ACT_UP_MATCH 45
 
 Servo FLWheel; //This is definitely correct. Good job Tom
 Servo BLWheel;
@@ -68,7 +68,7 @@ void upAct()
   ActRight.write(ACT_UP_MATCH);
 }
 
-void stopAct {
+void stopAct() {
   ActLeft.write(NEUTRAL);
   ActRight.write(NEUTRAL);
 }
@@ -131,7 +131,7 @@ void parseCommand(String buff)
     }
     else
     {
-      stopAct());
+      stopAct();
       halt();
     }
 
