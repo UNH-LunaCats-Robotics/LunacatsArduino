@@ -96,11 +96,12 @@ void setup()
 
 void parseCommand(String buff)
 {
+  Serial.println(buff);
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(buff);
   if (!root.success())
   {
-    Serial.println("Bad Json String");
+//    Serial.println("Bad Json String");
   }
   else
   {
@@ -131,11 +132,11 @@ void parseCommand(String buff)
     }
     else
     {
-      stopAct();
-      halt();
+//      Serial.println("wrong command");
+//      stopAct();
+//      halt();
     }
 
-    Serial.println(buff);
   }
 }
 
@@ -144,6 +145,10 @@ void loop()
 
   if (Serial.available() > 0)
   {
-    parseCommand(Serial.readString());
+    //parseCommand(Serial.readString());
+//    Serial.println(Serial.readString());
+     char inByte = Serial.read();
+     Serial.println(inByte);
   }
 }
+ 
