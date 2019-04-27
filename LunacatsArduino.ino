@@ -145,10 +145,13 @@ void loop()
 
   if (Serial.available() > 0)
   {
-    //parseCommand(Serial.readString());
-//    Serial.println(Serial.readString());
-     char inByte = Serial.read();
-     Serial.println(inByte);
+    String recieved = Serial.readString();
+    if(recieved == "init"){
+      Serial.println("success");
+    }
+    else{
+      parseCommand(recieved);
+    }
   }
 }
  
