@@ -14,7 +14,71 @@ Servo FRWheel;
 Servo BRWheel;
 Servo ActLeft;
 Servo ActRight;
+                      // PI
+#define ACTIONPIN 2   // 31
+#define ACTION_Q0    0   // 37
+#define ACTION_Q1    1   // 35
+#define ACTION_Q2    2   // 33
 
+                      // q2  q1  q0  
+#define HALT      0   // 0   0   0    
+#define FORWARD   1   // 0   0   1
+#define BACKWARD  2   // 0   1   0
+#define LEFT      3   // 0   1   1 
+#define RIGHT     4   // 1   0   0
+#define ACTSTOP   5   // 1   0   1
+#define ACTUP     6   // 1   1   0
+#define ACTDOWN   7   // 1   1   1    
+
+//action control pin defines action to take
+int getActionValue() {
+  return (4*digitalRead(ACTION_Q2))+(2*digitalRead(ACTION_Q1))+(1*digitalRead(ACTION_Q0));
+}
+
+void interpretCommand(){
+  int doAct = digitalRead(ACTIONPIN);
+  if(doAct){
+    int action = getActionValue();
+    switch(action){
+      case HALT:
+        Serial.println("halt");
+        halt();
+        break;
+      case FORWARD:
+        Serial.println("forward");
+        forward();
+        break;
+      case BACKWARD:
+        Serial.println("backward");
+        back();
+        break;
+      case LEFT:
+        Serial.println("left");
+        left();
+        break;
+      case RIGHT:
+        Serial.println("right");
+        right();
+        break;
+      case ACTSTOP:
+        Serial.println("actstop");
+        stopAct();
+        break;
+      case ACTUP:
+        Serial.println("actup");
+        upAct();
+        break;
+      case ACTDOWN:
+        Serial.println("actdown");
+        downAct();
+        break;
+      default:
+        Serial.println("not an action");
+        //uh
+        break;
+    }
+  }
+}
 
 void forward()
 {
@@ -61,7 +125,6 @@ void halt()
   BRWheel.write(i);
 }
 
-
 void upAct()
 {
   ActLeft.write(ACT_UP);
@@ -91,6 +154,11 @@ void setup()
 
   Serial.begin(115200);
 
+  pinMode(ACTIONPIN, INPUT);
+  pinMode(ACTION_Q2, INPUT);
+  pinMode(ACTION_Q1, INPUT);
+  pinMode(ACTION_Q0, INPUT);
+  
   halt();
 }
 
@@ -133,8 +201,8 @@ void parseCommand(String buff)
     else
     {
 //      Serial.println("wrong command");
-//      stopAct();
-//      halt();
+      stopAct();
+      halt();
     }
 
   }
@@ -142,7 +210,8 @@ void parseCommand(String buff)
 
 void loop()
 {
-
+  interpretCommand();
+  
   if (Serial.available() > 0)
   {
     String recieved = Serial.readString();
