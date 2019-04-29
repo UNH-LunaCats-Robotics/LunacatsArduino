@@ -1,4 +1,3 @@
-#include <ArduinoJson.h>
 #include <Servo.h>
 
 //Used for the Actuator
@@ -14,115 +13,48 @@ Servo FRWheel;
 Servo BRWheel;
 Servo ActLeft;
 Servo ActRight;
-                      // PI
-#define ACTIONPIN 2   // 31
-#define ACTION_Q0    0   // 37
-#define ACTION_Q1    1   // 35
-#define ACTION_Q2    2   // 33
 
-                      // q2  q1  q0  
-#define HALT      0   // 0   0   0    
-#define FORWARD   1   // 0   0   1
-#define BACKWARD  2   // 0   1   0
-#define LEFT      3   // 0   1   1 
-#define RIGHT     4   // 1   0   0
-#define ACTSTOP   5   // 1   0   1
-#define ACTUP     6   // 1   1   0
-#define ACTDOWN   7   // 1   1   1    
-
-//action control pin defines action to take
-int getActionValue() {
-  return (4*digitalRead(ACTION_Q2))+(2*digitalRead(ACTION_Q1))+(1*digitalRead(ACTION_Q0));
-}
-
-void interpretCommand(){
-  int doAct = digitalRead(ACTIONPIN);
-  if(doAct){
-    int action = getActionValue();
-    switch(action){
-      case HALT:
-        Serial.println("halt");
-        halt();
-        break;
-      case FORWARD:
-        Serial.println("forward");
-        forward();
-        break;
-      case BACKWARD:
-        Serial.println("backward");
-        back();
-        break;
-      case LEFT:
-        Serial.println("left");
-        left();
-        break;
-      case RIGHT:
-        Serial.println("right");
-        right();
-        break;
-      case ACTSTOP:
-        Serial.println("actstop");
-        stopAct();
-        break;
-      case ACTUP:
-        Serial.println("actup");
-        upAct();
-        break;
-      case ACTDOWN:
-        Serial.println("actdown");
-        downAct();
-        break;
-      default:
-        Serial.println("not an action");
-        //uh
-        break;
-    }
-  }
-}
+int Neutral = 90;
+int powerOffset = 10;
 
 void forward()
 {
-  int i = 110;
-  FLWheel.write(i);
-  BLWheel.write(i);
-  FRWheel.write(i);
-  BRWheel.write(i);
+  FLWheel.write(Neutral + powerOffset);
+  BLWheel.write(Neutral + powerOffset);
+  FRWheel.write(Neutral + powerOffset);
+  BRWheel.write(Neutral + powerOffset);
 }
 
 void left()
 {
-  int i = 90;
-  FLWheel.write(i - 25);
-  BLWheel.write(i - 25);
-  FRWheel.write(25 + i);
-  BRWheel.write(25 + i);
+  FLWheel.write(Neutral - powerOffset);
+  BLWheel.write(Neutral - powerOffset);
+  FRWheel.write(Neutral + powerOffset);
+  BRWheel.write(Neutral + powerOffset);
 }
 
 void right()
 {
-  int i = 90;
-  FLWheel.write(25 + i);
-  BLWheel.write(25 + i);
-  FRWheel.write(i - 25);
-  BRWheel.write(i - 25);
+  FLWheel.write(Neutral + powerOffset);
+  BLWheel.write(Neutral + powerOffset);
+  FRWheel.write(Neutral - powerOffset);
+  BRWheel.write(Neutral - powerOffset);
 }
 
 void back()
 {
-  int i = 70;
-  FLWheel.write(i);
-  BLWheel.write(i);
-  FRWheel.write(i);
-  BRWheel.write(i);
+  FLWheel.write(Neutral - powerOffset);
+  BLWheel.write(Neutral - powerOffset);
+  FRWheel.write(Neutral - powerOffset);
+  BRWheel.write(Neutral - powerOffset);
 }
 
 void halt()
 {
-  int i = 90;
-  FLWheel.write(i);
-  BLWheel.write(i);
-  FRWheel.write(i);
-  BRWheel.write(i);
+  FLWheel.write(Neutral);
+  BLWheel.write(Neutral);
+  FRWheel.write(Neutral);
+  BRWheel.write(Neutral);
 }
 
 void upAct()
@@ -151,76 +83,75 @@ void setup()
   BRWheel.attach(A3);
   ActLeft.attach(A5);
   ActRight.attach(A6);
-
+  
   Serial.begin(115200);
-
-  pinMode(ACTIONPIN, INPUT);
-  pinMode(ACTION_Q2, INPUT);
-  pinMode(ACTION_Q1, INPUT);
-  pinMode(ACTION_Q0, INPUT);
+  Serial.setTimeout(50);
   
   halt();
 }
 
-void parseCommand(String buff)
+void parseCommand(int msg)
 {
-  Serial.println(buff);
-  StaticJsonBuffer<200> jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(buff);
-  if (!root.success())
+  if (msg == 0)
   {
-//    Serial.println("Bad Json String");
+    
+    changeLEDState();
+    back();
   }
+  else if (msg == 1)
+  {
+    forward();
+  }
+  else if (msg == 2)
+  {
+    left();
+  }
+  else if (msg == 3)
+  {
+    right();
+  } else if (msg ==10)
+  {
+    upAct();
+  } else if (msg ==11)
+  {
+    downAct();
+  } else if (msg ==12)
+  {
+    powerOffset += 10;
+  } else if (msg ==13)
+  {
+    powerOffset -= 10;
+  }
+  
   else
   {
+    stopAct();
+    halt();
+  }
+  
+  
+}
 
-    if (root["c"] == 0)
-    {
-      back();
-      digitalWrite(LED_BUILTIN, HIGH);
-    }
-    else if (root["c"] == 1)
-    {
-      forward();
-      digitalWrite(LED_BUILTIN, LOW);
-    }
-    else if (root["c"] == 2)
-    {
-      left();
-    }
-    else if (root["c"] == 3)
-    {
-      right();
-    } else if (root["c"] ==10)
-    {
-      upAct();
-    } else if (root["c"] ==11)
-    {
-      downAct();
-    }
-    else
-    {
-//      Serial.println("wrong command");
-      stopAct();
-      halt();
-    }
+bool flashLED = false;
 
+void changeLEDState() {
+  flashLED = !flashLED;
+  if(flashLED) {
+    digitalWrite(LED_BUILTIN,HIGH);
+  }
+  else {
+    digitalWrite(LED_BUILTIN,LOW);
   }
 }
 
 void loop()
 {
-  interpretCommand();
   
   if (Serial.available() > 0)
   {
-    String recieved = Serial.readString();
-    if(recieved == "init"){
-      Serial.println("success");
-    }
-    else{
-      parseCommand(recieved);
-    }
+    int cmd = Serial.parseInt();
+    parseCommand(cmd);
   }
+  
 }
  
