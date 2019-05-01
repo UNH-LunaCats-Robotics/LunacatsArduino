@@ -14,71 +14,9 @@ Servo FRWheel;
 Servo BRWheel;
 Servo ActLeft;
 Servo ActRight;
-                      // PI
-#define ACTIONPIN 2   // 31
-#define ACTION_Q0    0   // 37
-#define ACTION_Q1    1   // 35
-#define ACTION_Q2    2   // 33
+Servo BallScrews;
+Servo Conveyor;
 
-                      // q2  q1  q0
-#define HALT      0   // 0   0   0
-#define FORWARD   1   // 0   0   1
-#define BACKWARD  2   // 0   1   0
-#define LEFT      3   // 0   1   1
-#define RIGHT     4   // 1   0   0
-#define ACTSTOP   5   // 1   0   1
-#define ACTUP     6   // 1   1   0
-#define ACTDOWN   7   // 1   1   1
-
-//action control pin defines action to take
-int getActionValue() {
-  return (4*digitalRead(ACTION_Q2))+(2*digitalRead(ACTION_Q1))+(1*digitalRead(ACTION_Q0));
-}
-
-void interpretCommand(){
-  int doAct = digitalRead(ACTIONPIN);
-  if(doAct){
-    int action = getActionValue();
-    switch(action){
-      case HALT:
-        Serial.println("halt");
-        halt();
-        break;
-      case FORWARD:
-        Serial.println("forward");
-        forward();
-        break;
-      case BACKWARD:
-        Serial.println("backward");
-        back();
-        break;
-      case LEFT:
-        Serial.println("left");
-        left();
-        break;
-      case RIGHT:
-        Serial.println("right");
-        right();
-        break;
-      case ACTSTOP:
-        Serial.println("actstop");
-        stopAct();
-        break;
-      case ACTUP:
-        Serial.println("actup");
-        upAct();
-        break;
-      case ACTDOWN:
-        Serial.println("actdown");
-        downAct();
-        break;
-      default:
-        Serial.println("not an action");
-        //uh
-        break;
-    }
-  }
-}
 
 void forward()
 {
@@ -142,6 +80,29 @@ void downAct()
   ActRight.write(ACT_DOWN_MATCH);
 }
 
+void drillUp()
+{
+  ActLeft.write(ACT_DOWN);
+  ActRight.write(ACT_DOWN_MATCH);
+}
+void ballsDrop()
+{
+  BallScrews.write(80);
+}
+void ballsUp()
+{
+  BallScrews.write(10);
+}
+
+void ConveyorEmpty()
+{
+  Conveyor.write(80);
+}
+void ConveyorCollect()
+{
+  Conveyor.write(100);
+}
+
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -149,9 +110,12 @@ void setup()
   BLWheel.attach(A2);
   FRWheel.attach(A1);
   BRWheel.attach(A3);
+  BallScrews.attach(A4);
   ActLeft.attach(A5);
   ActRight.attach(A6);
-
+  Conveyor.attach(A7);
+  
+  
   Serial.begin(115200);
   Serial.setTimeout(20);
 
@@ -198,6 +162,18 @@ void parseCommand(String buff)
     } else if (root["c"] ==11)
     {
       downAct();
+    } else if (root["c"] ==12)
+    {
+      ballsDrop();
+    } else if (root["c"] ==13)
+    {
+      ballsUp();
+    } else if (root["c"] ==14)
+    {
+      ConveyorCollect();
+    } else if (root["c"] ==15)
+    {
+      ConveyorEmpty();
     }
     else
     {
