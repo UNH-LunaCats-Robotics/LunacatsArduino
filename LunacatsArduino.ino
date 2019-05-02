@@ -8,6 +8,9 @@
 #define ACT_DOWN 170
 #define ACT_UP_MATCH 45
 
+#define AUGUR_ON_OFF 28
+#define AUGUR_DIRECTION 22
+
 Servo FLWheel; //This is definitely correct. Good job Tom
 Servo BLWheel;
 Servo FRWheel;
@@ -102,6 +105,19 @@ void ConveyorCollect()
 {
   Conveyor.write(100);
 }
+void turnAugurClockwise() {
+  digitalWrite(AUGUR_ON_OFF,HIGH);
+  digitalWrite(AUGUR_DIRECTION,LOW);
+}
+void turnAugurCounterClockwise() {
+  digitalWrite(AUGUR_ON_OFF,HIGH);
+  digitalWrite(AUGUR_DIRECTION,HIGH);
+}
+void turnAugurOff() {
+  digitalWrite(AUGUR_ON_OFF,   LOW);
+  digitalWrite(AUGUR_DIRECTION,LOW);
+}
+
 
 void setup()
 {
@@ -118,9 +134,14 @@ void setup()
   
   Serial.begin(115200);
   Serial.setTimeout(20);
+
+  pinMode(AUGUR_ON_OFF,OUTPUT);
+  pinMode(AUGUR_DIRECTION,OUTPUT);
+
   
   halt();
 }
+
 
 void parseCommand(String buff)
 {
@@ -169,12 +190,28 @@ void parseCommand(String buff)
     } else if (root["c"] ==15)
     {
       ConveyorEmpty();
+    } else if (root["c"] == 16)
+    {
+      turnAugurClockwise();
+    }
+    else if (root["c"] == 17)
+    {
+      turnAugurCounterClockwise();
+    }
+    else if (root["c"] == 18)
+    {
+      ballsUp();
+    }
+    else if (root["c"] == 19)
+    {
+      ballsDrop();
     }
     else
     {
 //      Serial.println("wrong command");
       stopAct();
       halt();
+      turnAugurOff();
     }
 
   }
