@@ -118,12 +118,7 @@ void setup()
   
   Serial.begin(115200);
   Serial.setTimeout(20);
-
-  pinMode(ACTIONPIN, INPUT);
-  pinMode(ACTION_Q2, INPUT);
-  pinMode(ACTION_Q1, INPUT);
-  pinMode(ACTION_Q0, INPUT);
-
+  
   halt();
 }
 
