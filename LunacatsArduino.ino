@@ -21,40 +21,41 @@ Servo BallScrews;
 Servo Conveyor;
 
 
+int offset = 0;
 void forward()
 {
   int i = 110;
-  FLWheel.write(i);
-  BLWheel.write(i);
-  FRWheel.write(i);
-  BRWheel.write(i);
+  FLWheel.write(i + offset);
+  BLWheel.write(i + offset);
+  FRWheel.write(i + offset);
+  BRWheel.write(i + offset);
 }
 
 void left()
 {
   int i = 90;
-  FLWheel.write(i - 25);
-  BLWheel.write(i - 25);
-  FRWheel.write(25 + i);
-  BRWheel.write(25 + i);
+  FLWheel.write(i - 25 - offset);
+  BLWheel.write(i - 25 - offset);
+  FRWheel.write(25 + i + offset);
+  BRWheel.write(25 + i + offset);
 }
 
 void right()
 {
   int i = 90;
-  FLWheel.write(25 + i);
-  BLWheel.write(25 + i);
-  FRWheel.write(i - 25);
-  BRWheel.write(i - 25);
+  FLWheel.write(25 + i + offset);
+  BLWheel.write(25 + i + offset);
+  FRWheel.write(i - 25 - offset);
+  BRWheel.write(i - 25 - offset);
 }
 
 void back()
 {
   int i = 70;
-  FLWheel.write(i);
-  BLWheel.write(i);
-  FRWheel.write(i);
-  BRWheel.write(i);
+  FLWheel.write(i - offset);
+  BLWheel.write(i - offset);
+  FRWheel.write(i - offset);
+  BRWheel.write(i - offset);
 }
 
 void halt()
@@ -99,12 +100,17 @@ void ballsUp()
 
 void ConveyorEmpty()
 {
-  Conveyor.write(80);
+  Conveyor.write(0);
 }
 void ConveyorCollect()
 {
-  Conveyor.write(100);
+  Conveyor.write(180);
 }
+void ConveyorHalt()
+{
+  Conveyor.write(90);
+}
+
 void turnAugurClockwise() {
   digitalWrite(AUGUR_ON_OFF,HIGH);
   digitalWrite(AUGUR_DIRECTION,LOW);
@@ -206,12 +212,21 @@ void parseCommand(String buff)
     {
       ballsDrop();
     }
+    else if (root["c"] == 20)
+    {
+      offset += 5;
+    }
+    else if(root["c"] == 21)
+    {
+      offset -= 5;
+    }
     else
     {
 //      Serial.println("wrong command");
       stopAct();
       halt();
       turnAugurOff();
+      ConveyorHalt();
     }
 
   }
