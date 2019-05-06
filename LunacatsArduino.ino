@@ -95,7 +95,7 @@ void ballsDrop()
 }
 void ballsUp()
 {
-  BallScrews.write(10);
+  BallScrews.write(150);
 }
 
 void ConveyorEmpty()
