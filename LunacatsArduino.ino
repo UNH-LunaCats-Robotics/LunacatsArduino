@@ -91,20 +91,24 @@ void drillUp()
 }
 void ballsDrop()
 {
-  BallScrews.write(80);
+  BallScrews.write(10);
 }
 void ballsUp()
 {
-  BallScrews.write(150);
+  BallScrews.write(170);
+}
+void ballsHalt()
+{
+  BallScrews.write(90);
 }
 
 void ConveyorEmpty()
 {
-  Conveyor.write(0);
+  Conveyor.write(10);
 }
 void ConveyorCollect()
 {
-  Conveyor.write(180);
+  Conveyor.write(170);
 }
 void ConveyorHalt()
 {
@@ -227,6 +231,7 @@ void parseCommand(String buff)
       halt();
       turnAugurOff();
       ConveyorHalt();
+      ballsHalt();
     }
 
   }
