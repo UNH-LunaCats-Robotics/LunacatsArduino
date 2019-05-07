@@ -23,7 +23,7 @@ Servo Conveyor;
 
 void forward()
 {
-  int i = 110;
+  int i = 140;
   FLWheel.write(i);
   BLWheel.write(i);
   FRWheel.write(i);
@@ -33,24 +33,24 @@ void forward()
 void left()
 {
   int i = 90;
-  FLWheel.write(i - 25);
-  BLWheel.write(i - 25);
-  FRWheel.write(25 + i);
-  BRWheel.write(25 + i);
+  FLWheel.write(i - 50);
+  BLWheel.write(i - 50);
+  FRWheel.write(50 + i);
+  BRWheel.write(50 + i);
 }
 
 void right()
 {
   int i = 90;
-  FLWheel.write(25 + i);
-  BLWheel.write(25 + i);
-  FRWheel.write(i - 25);
-  BRWheel.write(i - 25);
+  FLWheel.write(50 + i);
+  BLWheel.write(50 + i);
+  FRWheel.write(i - 50);
+  BRWheel.write(i - 50);
 }
 
 void back()
 {
-  int i = 70;
+  int i = 40;
   FLWheel.write(i);
   BLWheel.write(i);
   FRWheel.write(i);
