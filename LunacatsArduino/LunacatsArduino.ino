@@ -44,7 +44,7 @@ void powerWheel_FL(int i) {
 }
 
 void powerWheel_FR(int i) {
-  FRWheel.write(i+1);
+  FRWheel.write(i+2);
 }
 
 void powerWheel_BL(int i) {
