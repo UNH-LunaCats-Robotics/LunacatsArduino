@@ -1,6 +1,10 @@
 #include <ArduinoJson.h>
 #include <Servo.h>
 
+//##########################################//
+//                DEFINITIONS               //
+//##########################################//
+
 //Used for the Actuator
 #define NEUTRAL 92
 #define ACT_DOWN_MATCH 140
@@ -20,12 +24,42 @@ Servo ActRight;
 Servo BallScrews;
 Servo Conveyor;
 
+//##########################################//
+//                 MOVEMENT                 //
+//##########################################//
+
+// ------------ MOTOR FUNCTIONS ------------ //
+
+// #-NOTE-# 90 is not exact 0 for all motor 
+// encoders due to variation in creation. 
+// Therefore, trial and error determined 
+// the offset of the values read. 
+
+// ZERO     - Solid Orange
+// BACKWARD - flashing or solid red   (full speed = solid)
+// FORWARD  - flashing or solid green (full speed = solid)
+
+void powerWheel_FL(int i) {
+  FLWheel.write(i+1);
+}
+
+void powerWheel_FR(int i) {
+  FRWheel.write(i+1);
+}
+
+void powerWheel_BL(int i) {
+  BLWheel.write(i+1);
+}
+
+void powerWheel_BR(int i) {
+  BRWheel.write(i+1);
+}
 
 int offset = 0;
 void forward()
 {
   int i = 110;
-  FLWheel.write(i + offset);
+  powerWheel_FL(i + offset);
   BLWheel.write(i + offset);
   FRWheel.write(i + offset);
   BRWheel.write(i + offset);
@@ -34,38 +68,40 @@ void forward()
 void left()
 {
   int i = 90;
-  FLWheel.write(i - 25 - offset);
-  BLWheel.write(i - 25 - offset);
-  FRWheel.write(25 + i + offset);
-  BRWheel.write(25 + i + offset);
+  powerWheel_FL(i - 25 - offset);
+  powerWheel_BL(i - 25 - offset);
+  powerWheel_FR(25 + i + offset);
+  powerWheel_BR(25 + i + offset);
 }
 
 void right()
 {
   int i = 90;
-  FLWheel.write(25 + i + offset);
-  BLWheel.write(25 + i + offset);
-  FRWheel.write(i - 25 - offset);
-  BRWheel.write(i - 25 - offset);
+  powerWheel_FL(25 + i + offset);
+  powerWheel_BL(25 + i + offset);
+  powerWheel_FR(i - 25 - offset);
+  powerWheel_BR(i - 25 - offset);
 }
 
 void back()
 {
   int i = 70;
-  FLWheel.write(i - offset);
-  BLWheel.write(i - offset);
-  FRWheel.write(i - offset);
-  BRWheel.write(i - offset);
+  powerWheel_FL(i - offset);
+  powerWheel_BL(i - offset);
+  powerWheel_FR(i - offset);
+  powerWheel_BR(i - offset);
 }
 
 void halt()
 {
   int i = 90;
-  FLWheel.write(i);
-  BLWheel.write(i);
-  FRWheel.write(i);
-  BRWheel.write(i);
+  powerWheel_FL(i);
+  powerWheel_BL(i);
+  powerWheel_FR(i);
+  powerWheel_BR(i);
 }
+
+// ------------ ACTUATOR ------------ //
 
 void upAct()
 {
@@ -84,11 +120,17 @@ void downAct()
   ActRight.write(ACT_DOWN_MATCH);
 }
 
+
+// ------------ DRILL ------------ //
+
 void drillUp()
 {
   ActLeft.write(ACT_DOWN);
   ActRight.write(ACT_DOWN_MATCH);
 }
+
+// ------------ BALL SCREWS------------ //
+
 void ballsDrop()
 {
   BallScrews.write(10);
@@ -101,6 +143,8 @@ void ballsHalt()
 {
   BallScrews.write(90);
 }
+
+// ------------ CONVEYOR ------------ //
 
 void ConveyorEmpty()
 {
@@ -115,6 +159,8 @@ void ConveyorHalt()
   Conveyor.write(90);
 }
 
+// ------------ AUGER ------------ //
+
 void turnAugurClockwise() {
   digitalWrite(AUGUR_ON_OFF,HIGH);
   digitalWrite(AUGUR_DIRECTION,LOW);
@@ -128,6 +174,9 @@ void turnAugurOff() {
   digitalWrite(AUGUR_DIRECTION,LOW);
 }
 
+//##########################################//
+//                   MAIN                   //
+//##########################################//
 
 void setup()
 {
