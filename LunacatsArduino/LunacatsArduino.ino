@@ -33,7 +33,7 @@ Servo Conveyor;
 enum Commands {
   BACKWARD = 0, FORWARD = 1, LEFT = 2, RIGHT = 3,
   UPACT = 10, DOWNACT = 11, 
-  BALLDROP = 12, BALLUP = 13,
+  BALLDROP = 18, BALLUP = 19,
   CNVR_COLLECT = 14, CNVR_EMPTY = 15,
   AUGERTURN_CC = 16, AUGERTURN_CCW = 17,
   OFFSET_POS = 20, OFFSET_NEG = 21
@@ -238,11 +238,9 @@ void parseCommand(String buff)
       case DOWNACT:
         downAct();
         break;
-      case 19:
       case BALLDROP:
         ballsDrop();
         break;
-      case 18:
       case BALLUP:
         ballsDrop();
         break;
@@ -265,13 +263,13 @@ void parseCommand(String buff)
         //offset -= 5;
         break;
       default:
-        break;
 //      Serial.println("wrong command");
         stopAct();
         halt();
         turnAugurOff();
         conveyorHalt();
         ballsHalt();
+        break;
     }
 /*
     if (root["c"] == 0){
