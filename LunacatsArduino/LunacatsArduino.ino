@@ -30,6 +30,15 @@ Servo ActRight;
 Servo BallScrews;
 Servo Conveyor;
 
+enum Commands {
+  BACKWARD = 0, FORWARD = 1, LEFT = 2, RIGHT = 3,
+  UPACT = 10, DOWNACT = 11, 
+  BALLDROP = 12, BALLUP = 13,
+  CNVR_COLLECT = 14, CNVR_EMPTY = 15,
+  AUGERTURN_CC = 16, AUGERTURN_CCW = 17,
+  OFFSET_POS = 20, OFFSET_NEG = 21
+};
+
 //##########################################//
 //                 MOVEMENT                 //
 //##########################################//
@@ -193,20 +202,9 @@ void setup()
 
   pinMode(AUGUR_ON_OFF,OUTPUT);
   pinMode(AUGUR_DIRECTION,OUTPUT);
-
   
   halt();
 }
-
-
-enum Command {
-  BACKWARD = 0, FORWARD = 1, LEFT = 2, RIGHT = 3,
-  UPACT = 10, DOWNACT = 11, 
-  BALLDROP = 12, BALLUP = 13,
-  CNVR_COLLECT = 14, CNVR_EMPTY = 15,
-  AUGERTURN_CC = 16, AUGERTURN_CCW = 17,
-  OFFSET_POS = 20, OFFSET_NEG = 21
-} cmd;
 
 void parseCommand(String buff)
 {
