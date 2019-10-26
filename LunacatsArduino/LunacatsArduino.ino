@@ -1,4 +1,4 @@
-#include <ArduinoJson.h>
+//#include <ArduinoJson.h>
 #include <Servo.h>
 
 //##########################################//
@@ -29,15 +29,6 @@ Servo ActLeft;
 Servo ActRight;
 Servo BallScrews;
 Servo Conveyor;
-
-enum Commands {
-  BACKWARD = 0, FORWARD = 1, LEFT = 2, RIGHT = 3,
-  UPACT = 10, DOWNACT = 11, 
-  BALLDROP = 18, BALLUP = 19,
-  CNVR_COLLECT = 14, CNVR_EMPTY = 15,
-  AUGERTURN_CC = 16, AUGERTURN_CCW = 17,
-  OFFSET_POS = 20, OFFSET_NEG = 21
-};
 
 //##########################################//
 //                 MOVEMENT                 //
@@ -116,6 +107,12 @@ void back(){
 void halt(){
   int pwr = 0;
   powerDrive_All(pwr);
+}
+
+void moveRobot(String s) {
+  float angle = s.toFloat();
+  powerDrive_Left(20*sin(angle));
+  powerDrive_Right(20*cos(angle));
 }
 
 // ------------ ACTUATOR ------------ //
@@ -206,19 +203,55 @@ void setup()
   halt();
 }
 
+/*
+enum Commands {
+  BACKWARD = 0, FORWARD = 1, LEFT = 2, RIGHT = 3,
+  UPACT = 10, DOWNACT = 11, 
+  BALLDROP = 18, BALLUP = 19,
+  CNVR_COLLECT = 14, CNVR_EMPTY = 15,
+  AUGERTURN_CC = 16, AUGERTURN_CCW = 17,
+  OFFSET_POS = 20, OFFSET_NEG = 21
+};
+*/
+
+enum Commands {
+  //BACKWARD = 1, FORWARD = 2, LEFT = 3, RIGHT = 4,
+  MOVE = 1,
+  ACTUATOR = 5,
+  BALLSCREW = 6,
+  CONVEYOR = 7,
+  AUGER = 8,
+  OFFSET = 9
+};
+
+int getCommand(String s) {
+  if(s.length() == 1 || (s[1]-'0') > 9 || (s[1]-'0') < 0 ) {
+    return s[0]-'0';
+  }
+  else return ((s[0]-'0')*10)+(s[1]-'0');
+}
+
+bool isOn(String s) {
+  return s[2] - '0';
+}
+
 void parseCommand(String buff)
 {
-  Serial.println(buff);
-  StaticJsonBuffer<200> jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(buff);
+  //Serial.println(buff);
+  //StaticJsonBuffer<200> jsonBuffer;
+  //JsonObject &root = jsonBuffer.parseObject(buff);
+  //bool success = root.success();
+  int input = getCommand(buff);
+  bool success = (input != -1);
   
-  if (!root.success()) {
+  Serial.println(input);
+  if (!success) {
     Serial.println("Bad Json String");
   }
   else {
-    int input = root["c"];
+    //int input = root["c"];
     switch(input) {
-      case BACKWARD:
+    /*case BACKWARD:
         back();
         digitalWrite(LED_BUILTIN, HIGH);
         break;
@@ -231,8 +264,31 @@ void parseCommand(String buff)
         break;
       case RIGHT:
         right();
+        break; */
+      case MOVE: 
+        moveRobot(buff.substring(2));
         break;
-      case UPACT:
+      case ACTUATOR:
+        if(isOn(buff)) upAct();
+        else downAct();
+        break;
+      case BALLSCREW:
+        if(isOn(buff)) ballsUp();
+        else ballsDrop();
+        break;
+      case CONVEYOR:
+        if(isOn(buff)) conveyorCollect();
+        else conveyorEmpty();
+        break;
+      case AUGER:
+        if(isOn(buff)) turnAugurClockwise();
+        else turnAugurCounterClockwise();
+        break;
+      case OFFSET:
+        //if(isOn(buff)) offset += 5;
+        //else offset -= 5;
+        break; 
+    /*case UPACT:
         upAct();
         break;
       case DOWNACT:
@@ -261,7 +317,7 @@ void parseCommand(String buff)
         break;
       case OFFSET_NEG:
         //offset -= 5;
-        break;
+        break; */
       default:
 //      Serial.println("wrong command");
         stopAct();
@@ -271,66 +327,6 @@ void parseCommand(String buff)
         ballsHalt();
         break;
     }
-/*
-    if (root["c"] == 0){
-      back();
-      digitalWrite(LED_BUILTIN, HIGH);
-    }
-    else if (root["c"] == 1){
-      forward();
-      digitalWrite(LED_BUILTIN, LOW);
-    }
-    else if (root["c"] == 2){
-      left();
-    }
-    else if (root["c"] == 3){
-      right();
-    } 
-    else if (root["c"] ==10){
-      upAct();
-    } 
-    else if (root["c"] ==11){
-      downAct();
-    } 
-    else if (root["c"] ==12){
-      ballsDrop();
-    } 
-    else if (root["c"] ==13){
-      ballsUp();
-    } 
-    else if (root["c"] ==14){
-      ConveyorCollect();
-    } 
-    else if (root["c"] ==15){
-      ConveyorEmpty();
-    } 
-    else if (root["c"] == 16){
-      turnAugurClockwise();
-    }
-    else if (root["c"] == 17){
-      turnAugurCounterClockwise();
-    }
-    else if (root["c"] == 18){
-      ballsUp();
-    }
-    else if (root["c"] == 19){
-      ballsDrop();
-    }
-    else if (root["c"] == 20){
-      //offset += 5;
-    }
-    else if(root["c"] == 21){
-      //offset -= 5;
-    }
-    else {
-//      Serial.println("wrong command");
-      stopAct();
-      halt();
-      turnAugurOff();
-      ConveyorHalt();
-      ballsHalt();
-    }
-*/
   }
 }
 
