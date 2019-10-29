@@ -203,17 +203,19 @@ void setup()
   halt();
 }
 
-/*
+
 enum Commands {
-  BACKWARD = 0, FORWARD = 1, LEFT = 2, RIGHT = 3,
+  //BACKWARD = 0, FORWARD = 1, LEFT = 2, RIGHT = 3,
+  MOVE = 1,
   UPACT = 10, DOWNACT = 11, 
   BALLDROP = 18, BALLUP = 19,
   CNVR_COLLECT = 14, CNVR_EMPTY = 15,
   AUGERTURN_CC = 16, AUGERTURN_CCW = 17,
   OFFSET_POS = 20, OFFSET_NEG = 21
 };
-*/
 
+
+/*
 enum Commands {
   //BACKWARD = 1, FORWARD = 2, LEFT = 3, RIGHT = 4,
   MOVE = 1,
@@ -223,34 +225,39 @@ enum Commands {
   AUGER = 8,
   OFFSET = 9
 };
+*/
 
 int getCommand(String s) {
   if(s.length() == 1 || (s[1]-'0') > 9 || (s[1]-'0') < 0 ) {
     return s[0]-'0';
   }
-  else return ((s[0]-'0')*10)+(s[1]-'0');
+  return ((s[0]-'0')*10)+(s[1]-'0');
 }
 
-bool isOn(String s) {
-  return s[2] - '0';
-}
 
-void parseCommand(String buff)
-{
-  //Serial.println(buff);
-  //StaticJsonBuffer<200> jsonBuffer;
-  //JsonObject &root = jsonBuffer.parseObject(buff);
-  //bool success = root.success();
-  int input = getCommand(buff);
-  bool success = (input != -1);
-  
-  Serial.println(input);
-  if (!success) {
-    Serial.println("Bad Json String");
+int isOn(String s) {
+  if(s.length() > 3 && s[2] == ' ') {
+    int res = s[3] - '0';
+    if( res == 0 || res == 1 ) return res; 
   }
-  else {
-    //int input = root["c"];
-    switch(input) {
+  int res = s[2] - '0';
+  if( res == 0 || res == 1 ) return res;
+  return -1;  
+}
+
+
+void stopAll() {
+  Serial.println("wrong command");
+  stopAct();
+  halt();
+  turnAugurOff();
+  conveyorHalt();
+  ballsHalt();
+}
+
+void startCommand(int input) {
+  //Serial.println("starting...");
+  switch(input) {
     /*case BACKWARD:
         back();
         digitalWrite(LED_BUILTIN, HIGH);
@@ -265,30 +272,7 @@ void parseCommand(String buff)
       case RIGHT:
         right();
         break; */
-      case MOVE: 
-        moveRobot(buff.substring(2));
-        break;
-      case ACTUATOR:
-        if(isOn(buff)) upAct();
-        else downAct();
-        break;
-      case BALLSCREW:
-        if(isOn(buff)) ballsUp();
-        else ballsDrop();
-        break;
-      case CONVEYOR:
-        if(isOn(buff)) conveyorCollect();
-        else conveyorEmpty();
-        break;
-      case AUGER:
-        if(isOn(buff)) turnAugurClockwise();
-        else turnAugurCounterClockwise();
-        break;
-      case OFFSET:
-        //if(isOn(buff)) offset += 5;
-        //else offset -= 5;
-        break; 
-    /*case UPACT:
+      case UPACT:
         upAct();
         break;
       case DOWNACT:
@@ -317,16 +301,62 @@ void parseCommand(String buff)
         break;
       case OFFSET_NEG:
         //offset -= 5;
-        break; */
+        break; 
       default:
-//      Serial.println("wrong command");
-        stopAct();
-        halt();
-        turnAugurOff();
-        conveyorHalt();
-        ballsHalt();
+        stopAll();
         break;
     }
+}
+
+void stopCommand(int input) {
+  //Serial.println("stopping...");
+  switch(input) {
+      case UPACT:
+      case DOWNACT:
+        stopAct();
+        break;
+      case BALLDROP:
+      case BALLUP:
+        ballsHalt();
+        break;
+      case CNVR_COLLECT:
+      case CNVR_EMPTY:
+        conveyorHalt();
+        break;
+      case AUGERTURN_CC:
+      case AUGERTURN_CCW:
+        turnAugurOff();
+        break;
+      case OFFSET_POS:
+      case OFFSET_NEG:
+        break;
+      default:
+        stopAll();
+        break;
+    }
+}
+
+void parseCommand(String buff)
+{
+  //Serial.println(buff);
+  //StaticJsonBuffer<200> jsonBuffer;
+  //JsonObject &root = jsonBuffer.parseObject(buff);
+  //bool success = root.success();
+  int input = getCommand(buff);
+  bool success = (input != -1);
+  
+  //Serial.println(input);
+  if (!success) {
+    Serial.println("Bad Json String");
+  }
+  else {
+    //int input = root["c"];
+    if(input == MOVE) moveRobot(buff.substring(2));
+    
+    int res = isOn(buff);
+    if(res == -1) stopAll();
+    else if(res) startCommand(input);
+    else stopCommand(input);
   }
 }
 
