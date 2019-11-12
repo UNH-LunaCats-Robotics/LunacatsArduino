@@ -228,23 +228,37 @@ enum Commands {
 */
 
 int getCommand(String s) {
-  if(s.length() == 1 || (s[1]-'0') > 9 || (s[1]-'0') < 0 ) {
-    return s[0]-'0';
+  if(s.length() < 2) return -1;
+  if(s[1] == ':') {
+    char cmd = s[0];
+    switch(cmd) {
+      case 'M': return MOVE;
+      case 'Y': return BALLDROP;
+      case 'B': return BALLUP; 
+      case 'A': return AUGERTURN_CC;
+      case 'X': return AUGERTURN_CCW;
+      case 'L': return CNVR_EMPTY;
+      case 'R': return DOWNACT;
+      case 'S': 
+      default:  return -1;
+    }
   }
-  return ((s[0]-'0')*10)+(s[1]-'0');
+  if(s[0] != 'Z') return -1;
+  char cmd = s[1];
+  if(cmd == 'L') return CNVR_COLLECT;
+  if(cmd == 'R') return UPACT;
+  
+  return -1;
 }
-
 
 int isOn(String s) {
-  if(s.length() > 3 && s[2] == ' ') {
-    int res = s[3] - '0';
-    if( res == 0 || res == 1 ) return res; 
-  }
-  int res = s[2] - '0';
-  if( res == 0 || res == 1 ) return res;
-  return -1;  
+  int i = 2;
+  if(s[2] == ':') i = 3;
+  
+  int res = s[i]-'0';
+  if(res != 0 && res != 1) return -1;
+  return res;
 }
-
 
 void stopAll() {
   Serial.println("wrong command");
@@ -257,6 +271,7 @@ void stopAll() {
 
 void startCommand(int input) {
   //Serial.println("starting...");
+  char res = '1';
   switch(input) {
     /*case BACKWARD:
         back();
@@ -303,13 +318,16 @@ void startCommand(int input) {
         //offset -= 5;
         break; 
       default:
+        res = '0';
         stopAll();
         break;
     }
+    Serial.println(res);
 }
 
 void stopCommand(int input) {
   //Serial.println("stopping...");
+  char res = '1';
   switch(input) {
       case UPACT:
       case DOWNACT:
@@ -331,9 +349,11 @@ void stopCommand(int input) {
       case OFFSET_NEG:
         break;
       default:
+        res = '0';
         stopAll();
         break;
     }
+    Serial.println(res);
 }
 
 void parseCommand(String buff)
@@ -345,17 +365,18 @@ void parseCommand(String buff)
   int input = getCommand(buff);
   bool success = (input != -1);
   
-  //Serial.println(input);
   if (!success) {
     Serial.println("Bad Json String");
   }
   else {
-    //int input = root["c"];
-    if(input == MOVE) moveRobot(buff.substring(2));
+    int start = isOn(buff);
+    if(start == -1) stopAll();
     
-    int res = isOn(buff);
-    if(res == -1) stopAll();
-    else if(res) startCommand(input);
+    if(input == MOVE) {
+      if(!start) halt();
+      else moveRobot(buff.substring(2));
+    }
+    else if(start) startCommand(input);
     else stopCommand(input);
   }
 }
@@ -363,7 +384,6 @@ void parseCommand(String buff)
 void loop()
 {
   // interpretCommand();
-
   if (Serial.available() > 0)
   {
     String recieved = Serial.readString();
@@ -374,5 +394,4 @@ void loop()
       parseCommand(recieved);
     }
   }
-  
 }
